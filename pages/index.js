@@ -11,7 +11,7 @@ export default function LoginPage() {
 
         <input type="submit" value="Login" />
       </form>
-      <div className="footer">⚡ Operated by Shadow | ID: Phantom-01</div>
+      <div className="footer">⚡ Operated by fanky | ID: Phantom-01</div>
       <style jsx>{`
         * {
           margin: 0;
