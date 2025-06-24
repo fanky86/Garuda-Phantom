@@ -1,5 +1,5 @@
 import { db } from '../../lib/firebase';
-import { collection, getDocs, query, where } from 'firebase/firestore';
+import { collection, getDocs, query, where, limit } from 'firebase/firestore';
 
 export default async function handler(req, res) {
   if (req.method === 'POST') {
@@ -20,12 +20,13 @@ export default async function handler(req, res) {
       const q = query(
         collection(db, 'admins'),
         where('username', '==', username),
-        where('password', '==', password)
+        where('password', '==', password),
+        limit(1) // ✅ Ambil hanya satu hasil, biar lebih cepat
       );
       const querySnapshot = await getDocs(q);
 
       if (querySnapshot.empty) {
-        // ❌ Username atau password salah
+        // ❌ Login gagal
         res.writeHead(302, { Location: '/?error=3' });
         res.end();
         return;
