@@ -1,51 +1,44 @@
 import { db } from '../../lib/firebase';
-import { collection, query, where, getDocs } from 'firebase/firestore';
-import { serialize } from 'cookie';
+import { collection, getDocs, query, where } from 'firebase/firestore';
 
 export default async function handler(req, res) {
   if (req.method === 'POST') {
-    const { username, password } = req.body;
+    let body = '';
+
+    await new Promise((resolve) => {
+      req.on('data', (chunk) => {
+        body += chunk.toString();
+      });
+      req.on('end', resolve);
+    });
+
+    const params = new URLSearchParams(body);
+    const username = params.get('username');
+    const password = params.get('password');
 
     try {
-      // Cari user dengan username "admin"
-      const q = query(collection(db, 'users'), where('username', '==', username));
-      const snapshot = await getDocs(q);
+      const q = query(
+        collection(db, 'admins'),
+        where('username', '==', username),
+        where('password', '==', password)
+      );
+      const querySnapshot = await getDocs(q);
 
-      if (snapshot.empty) {
-        // Username tidak ditemukan
-        res.writeHead(302, { Location: '/?error=1' });
-        return res.end();
-      }
-
-      const user = snapshot.docs[0].data();
-
-      if (user.role !== 'admin') {
-        // Bukan admin
-        res.writeHead(302, { Location: '/?error=2' });
-        return res.end();
-      }
-
-      if (user.password !== password) {
-        // Password salah
+      if (querySnapshot.empty) {
+        // ❌ Username atau password salah
         res.writeHead(302, { Location: '/?error=3' });
-        return res.end();
+        res.end();
+        return;
       }
 
-      // Jika valid & role admin → set cookie dan redirect
-      res.setHeader('Set-Cookie', serialize('session', '1', {
-        path: '/',
-        httpOnly: true,
-        maxAge: 3600
-      }));
-
+      // ✅ Login berhasil
+      res.setHeader('Set-Cookie', `session=1; Path=/; HttpOnly`);
       res.writeHead(302, { Location: '/dashboard' });
       res.end();
-
     } catch (err) {
-      console.error('Login error:', err);
+      console.error('Firebase login error:', err);
       res.status(500).send('Internal Server Error');
     }
-
   } else {
     res.status(405).send('Method Not Allowed');
   }
