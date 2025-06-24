@@ -5,15 +5,17 @@ export default function LoginPage() {
   const router = useRouter();
   const { error } = router.query;
   const [loading, setLoading] = useState(false);
-  const [form, setForm] = useState({ username: '', password: '' });
+  const [remember, setRemember] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
 
+    const form = e.target;
     const formData = new URLSearchParams();
-    formData.append('username', form.username);
-    formData.append('password', form.password);
+    formData.append('username', form.username.value);
+    formData.append('password', form.password.value);
+    formData.append('remember', remember ? '1' : '0');
 
     const res = await fetch('/api/login', {
       method: 'POST',
@@ -26,7 +28,7 @@ export default function LoginPage() {
     if (res.redirected) {
       window.location.href = res.url;
     } else {
-      setLoading(false); // stop loading if error but not redirected
+      setLoading(false);
     }
   };
 
@@ -42,30 +44,25 @@ export default function LoginPage() {
         </p>
       )}
 
-      <form onSubmit={handleSubmit}>
+      <form method="post" onSubmit={handleSubmit}>
         <label htmlFor="username">Username</label>
-        <input
-          type="text"
-          id="username"
-          name="username"
-          value={form.username}
-          onChange={(e) => setForm({ ...form, username: e.target.value })}
-          required
-        />
+        <input type="text" id="username" name="username" required />
 
         <label htmlFor="password">Password</label>
-        <input
-          type="password"
-          id="password"
-          name="password"
-          value={form.password}
-          onChange={(e) => setForm({ ...form, password: e.target.value })}
-          required
-        />
+        <input type="password" id="password" name="password" required />
+
+        <label className="remember">
+          <input
+            type="checkbox"
+            name="remember"
+            checked={remember}
+            onChange={(e) => setRemember(e.target.checked)}
+          />
+          Remember Me
+        </label>
 
         <input type="submit" value={loading ? 'Loading...' : 'Login'} disabled={loading} />
       </form>
-
       <div className="footer">⚡ Operated by fanky | ID: Phantom-01</div>
 
       <style jsx>{`
@@ -142,6 +139,16 @@ export default function LoginPage() {
           margin-top: 20px;
           font-size: 0.8rem;
           opacity: 0.6;
+        }
+        .remember {
+          display: flex;
+          align-items: center;
+          margin-bottom: 15px;
+          font-size: 0.85rem;
+          color: #aaa;
+        }
+        .remember input {
+          margin-right: 8px;
         }
       `}</style>
     </div>
