@@ -1,8 +1,14 @@
 import { useRouter } from 'next/router';
+import { useState } from 'react';
 
 export default function LoginPage() {
   const router = useRouter();
   const { error } = router.query;
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = () => {
+    setLoading(true);
+  };
 
   return (
     <div className="container">
@@ -16,15 +22,16 @@ export default function LoginPage() {
         </p>
       )}
 
-      <form action="/api/login" method="post">
+      <form action="/api/login" method="post" onSubmit={handleSubmit}>
         <label htmlFor="username">Username</label>
         <input type="text" id="username" name="username" required />
 
         <label htmlFor="password">Password</label>
         <input type="password" id="password" name="password" required />
 
-        <input type="submit" value="Login" />
+        <input type="submit" value={loading ? 'Loading...' : 'Login'} disabled={loading} />
       </form>
+
       <div className="footer">⚡ Operated by fanky | ID: Phantom-01</div>
 
       <style jsx>{`
@@ -92,6 +99,10 @@ export default function LoginPage() {
         }
         input[type="submit"]:hover {
           background-color: #e60038;
+        }
+        input[type="submit"]:disabled {
+          background-color: #444;
+          cursor: not-allowed;
         }
         .footer {
           margin-top: 20px;
