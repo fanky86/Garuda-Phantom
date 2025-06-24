@@ -5,9 +5,29 @@ export default function LoginPage() {
   const router = useRouter();
   const { error } = router.query;
   const [loading, setLoading] = useState(false);
+  const [form, setForm] = useState({ username: '', password: '' });
 
-  const handleSubmit = () => {
+  const handleSubmit = async (e) => {
+    e.preventDefault();
     setLoading(true);
+
+    const formData = new URLSearchParams();
+    formData.append('username', form.username);
+    formData.append('password', form.password);
+
+    const res = await fetch('/api/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+      body: formData.toString()
+    });
+
+    if (res.redirected) {
+      window.location.href = res.url;
+    } else {
+      setLoading(false); // stop loading if error but not redirected
+    }
   };
 
   return (
@@ -22,12 +42,26 @@ export default function LoginPage() {
         </p>
       )}
 
-      <form action="/api/login" method="post" onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit}>
         <label htmlFor="username">Username</label>
-        <input type="text" id="username" name="username" required />
+        <input
+          type="text"
+          id="username"
+          name="username"
+          value={form.username}
+          onChange={(e) => setForm({ ...form, username: e.target.value })}
+          required
+        />
 
         <label htmlFor="password">Password</label>
-        <input type="password" id="password" name="password" required />
+        <input
+          type="password"
+          id="password"
+          name="password"
+          value={form.password}
+          onChange={(e) => setForm({ ...form, password: e.target.value })}
+          required
+        />
 
         <input type="submit" value={loading ? 'Loading...' : 'Login'} disabled={loading} />
       </form>
