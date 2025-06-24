@@ -1,8 +1,9 @@
+// /pages/api/login.js
 import { db } from '../../lib/firebase';
 import { collection, getDocs } from 'firebase/firestore';
 
 const adminCache = new Map(); // username => password
-let lastCacheTime = 0;
+let cacheLoaded = false;
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -20,13 +21,9 @@ export default async function handler(req, res) {
   const params = new URLSearchParams(body);
   const username = params.get('username');
   const password = params.get('password');
-  const remember = params.get('remember') === '1';
 
   try {
-    // Refresh cache jika sudah lebih dari 5 menit
-    const now = Date.now();
-    if (now - lastCacheTime > 5 * 60 * 1000) {
-      adminCache.clear();
+    if (!cacheLoaded) {
       const snapshot = await getDocs(collection(db, 'admins'));
       snapshot.forEach((doc) => {
         const data = doc.data();
@@ -34,29 +31,22 @@ export default async function handler(req, res) {
           adminCache.set(data.username, data.password);
         }
       });
-      lastCacheTime = now;
+      cacheLoaded = true;
     }
 
-    // Cek login dari cache
     if (!adminCache.has(username)) {
-      res.writeHead(302, { Location: '/?error=1' }); // ❌ Username tidak ditemukan
+      res.writeHead(302, { Location: '/?error=1' });
       res.end();
       return;
     }
 
     if (adminCache.get(username) !== password) {
-      res.writeHead(302, { Location: '/?error=3' }); // ❌ Password salah
+      res.writeHead(302, { Location: '/?error=3' });
       res.end();
       return;
     }
 
-    // ✅ Login berhasil
-    res.setHeader(
-      'Set-Cookie',
-      remember
-        ? `session=1; Path=/; HttpOnly; Max-Age=604800` // 7 hari
-        : `session=1; Path=/; HttpOnly`
-    );
+    res.setHeader('Set-Cookie', `session=1; Path=/; HttpOnly`);
     res.writeHead(302, { Location: '/dashboard' });
     res.end();
 
