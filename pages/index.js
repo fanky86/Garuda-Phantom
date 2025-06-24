@@ -20,9 +20,9 @@ export default function LoginPage() {
     const res = await fetch('/api/login', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/x-www-form-urlencoded'
+        'Content-Type': 'application/x-www-form-urlencoded',
       },
-      body: formData.toString()
+      body: formData.toString(),
     });
 
     if (res.redirected) {
@@ -61,8 +61,19 @@ export default function LoginPage() {
           Remember Me
         </label>
 
-        <input type="submit" value={loading ? 'Loading...' : 'Login'} disabled={loading} />
+        <button type="submit" disabled={loading}>
+          {loading ? (
+            <span className="spinner">
+              <span className="dot one"></span>
+              <span className="dot two"></span>
+              <span className="dot three"></span>
+            </span>
+          ) : (
+            'Login'
+          )}
+        </button>
       </form>
+
       <div className="footer">⚡ Operated by fanky | ID: Phantom-01</div>
 
       <style jsx>{`
@@ -107,8 +118,8 @@ export default function LoginPage() {
           margin-bottom: 5px;
           font-size: 0.9rem;
         }
-        input[type="text"],
-        input[type="password"] {
+        input[type='text'],
+        input[type='password'] {
           width: 100%;
           padding: 10px;
           margin-bottom: 15px;
@@ -117,7 +128,7 @@ export default function LoginPage() {
           border-radius: 5px;
           color: #fff;
         }
-        input[type="submit"] {
+        button {
           width: 100%;
           padding: 10px;
           background-color: #ff0040;
@@ -127,11 +138,13 @@ export default function LoginPage() {
           font-weight: bold;
           cursor: pointer;
           transition: background 0.3s;
+          font-family: 'Courier New', monospace;
+          font-size: 1rem;
         }
-        input[type="submit"]:hover {
+        button:hover {
           background-color: #e60038;
         }
-        input[type="submit"]:disabled {
+        button:disabled {
           background-color: #444;
           cursor: not-allowed;
         }
@@ -149,6 +162,33 @@ export default function LoginPage() {
         }
         .remember input {
           margin-right: 8px;
+        }
+        .spinner {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+        }
+        .dot {
+          width: 6px;
+          height: 6px;
+          background-color: white;
+          border-radius: 50%;
+          margin: 0 3px;
+          animation: blink 1.4s infinite both;
+        }
+        .dot.one {
+          animation-delay: -0.32s;
+        }
+        .dot.two {
+          animation-delay: -0.16s;
+        }
+        @keyframes blink {
+          0%, 80%, 100% {
+            opacity: 0;
+          }
+          40% {
+            opacity: 1;
+          }
         }
       `}</style>
     </div>
