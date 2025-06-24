@@ -1,7 +1,21 @@
+import { useRouter } from 'next/router';
+
 export default function LoginPage() {
+  const router = useRouter();
+  const { error } = router.query;
+
   return (
     <div className="container">
       <h1>Garuda Phantom</h1>
+
+      {error && (
+        <p className="error-message">
+          {error === '1' && '❌ Username tidak ditemukan'}
+          {error === '2' && '❌ Anda bukan admin'}
+          {error === '3' && '❌ Password salah'}
+        </p>
+      )}
+
       <form action="/api/login" method="post">
         <label htmlFor="username">Username</label>
         <input type="text" id="username" name="username" required />
@@ -12,6 +26,7 @@ export default function LoginPage() {
         <input type="submit" value="Login" />
       </form>
       <div className="footer">⚡ Operated by fanky | ID: Phantom-01</div>
+
       <style jsx>{`
         * {
           margin: 0;
@@ -33,6 +48,14 @@ export default function LoginPage() {
           margin-bottom: 10px;
           color: #ff0040;
           text-shadow: 0 0 5px #ff0040, 0 0 15px #ff0040;
+        }
+        .error-message {
+          background-color: #2e0000;
+          color: #ff4a4a;
+          padding: 10px;
+          border-radius: 5px;
+          margin-bottom: 15px;
+          font-size: 0.85rem;
         }
         form {
           background-color: #1c1c1c;
